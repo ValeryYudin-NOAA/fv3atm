@@ -1,0 +1,261 @@
+  type GFS_diag_type
+
+    real (kind=kind_phys), pointer :: dugwd  (:)     => null()   !< vertically integrated u change by OGWD
+    real (kind=kind_phys), pointer :: dvgwd  (:)     => null()   !< vertically integrated v change by OGWD
+    
+!---vay-2018 UGWP-diagnostics daily mean
+!
+    real (kind=kind_phys), pointer :: dudt_tot (:,:) => null()  !< daily aver GFS_phys tend for WE-U
+    real (kind=kind_phys), pointer :: dvdt_tot (:,:) => null()  !< daily aver GFS_phys tend for SN-V
+    real (kind=kind_phys), pointer :: dtdt_tot (:,:) => null()  !< daily aver GFS_phys tend for Temp-re
+!
+    real (kind=kind_phys), pointer :: du3dt_pbl(:,:) => null()  !< daily aver GFS_phys tend for WE-U pbl
+    real (kind=kind_phys), pointer :: dv3dt_pbl(:,:) => null()  !< daily aver GFS_phys tend for SN-V pbl
+    real (kind=kind_phys), pointer :: dt3dt_pbl(:,:) => null()  !< daily aver GFS_phys tend for Temp pbl
+!
+    real (kind=kind_phys), pointer :: du3dt_ogw(:,:) => null()  !< daily aver GFS_phys tend for WE-U OGW
+    real (kind=kind_phys), pointer :: dv3dt_ogw(:,:) => null()  !< daily aver GFS_phys tend for SN-V OGW
+    real (kind=kind_phys), pointer :: dt3dt_ogw(:,:) => null()  !< daily aver GFS_phys tend for Temp OGW
+!
+    real (kind=kind_phys), pointer :: du3dt_mtb(:,:) => null()  !< daily aver GFS_phys tend for WE-U MTB
+    real (kind=kind_phys), pointer :: dv3dt_mtb(:,:) => null()  !< daily aver GFS_phys tend for SN-V MTB
+    real (kind=kind_phys), pointer :: dt3dt_mtb(:,:) => null()  !< daily aver GFS_phys tend for Temp MTB
+!
+    real (kind=kind_phys), pointer :: du3dt_tms(:,:) => null()  !< daily aver GFS_phys tend for WE-U TMS
+    real (kind=kind_phys), pointer :: dv3dt_tms(:,:) => null()  !< daily aver GFS_phys tend for SN-V TMS
+    real (kind=kind_phys), pointer :: dt3dt_tms(:,:) => null()  !< daily aver GFS_phys tend for Temp TMS
+!
+    real (kind=kind_phys), pointer :: du3dt_ngw(:,:) => null()  !< daily aver GFS_phys tend for WE-U NGW
+    real (kind=kind_phys), pointer :: dv3dt_ngw(:,:) => null()  !< daily aver GFS_phys tend for SN-V NGW
+    real (kind=kind_phys), pointer :: dt3dt_ngw(:,:) => null()  !< daily aver GFS_phys tend for Temp NGW
+!
+    real (kind=kind_phys), pointer :: du3dt_cgw(:,:) => null()  !< daily aver GFS_phys tend for WE-U NGW
+    real (kind=kind_phys), pointer :: dv3dt_cgw(:,:) => null()  !< daily aver GFS_phys tend for SN-V NGW
+    real (kind=kind_phys), pointer :: dt3dt_cgw(:,:) => null()  !< daily aver GFS_phys tend for Temp NGW
+!
+    real (kind=kind_phys), pointer :: du3dt_moist(:,:) => null()  !< daily aver GFS_phys tend for WE-U MOIST
+    real (kind=kind_phys), pointer :: dv3dt_moist(:,:) => null()  !< daily aver GFS_phys tend for SN-V MOIST
+    real (kind=kind_phys), pointer :: dt3dt_moist(:,:) => null()  !< daily aver GFS_phys tend for Temp MOIST
+
+    real (kind=kind_phys), pointer :: uav_ugwp(:,:)   => null()   ! aver  wind UAV from physics
+    real (kind=kind_phys), pointer :: tav_ugwp(:,:)   => null()   ! aver  temp UAV from physics
+    real (kind=kind_phys), pointer :: du3dt_dyn(:,:)  => null()   ! U Tend-dynamics "In"-"PhysOut"
+    
+!--- COODRE ORO diagnostics
+    real (kind=kind_phys), pointer :: zmtb(:)         => null()   !
+    real (kind=kind_phys), pointer :: zogw(:)         => null()   !
+    real (kind=kind_phys), pointer :: zlwb(:)         => null()   !!
+    real (kind=kind_phys), pointer :: tau_ogw(:)      => null()   !!
+    real (kind=kind_phys), pointer :: tau_ngw(:)      => null()   !!
+    real (kind=kind_phys), pointer :: tau_mtb(:)      => null()   !
+    real (kind=kind_phys), pointer :: tau_tofd(:)     => null()   !
+!---vay-2018 UGWP-diagnostics 
+
+   
+#ifdef CCPP    
+        !--- Drag Suite variables
+    real (kind=kind_phys), pointer :: dtaux2d_ls  (:,:)   => null()  !
+    real (kind=kind_phys), pointer :: dtauy2d_ls  (:,:)   => null()  !
+    real (kind=kind_phys), pointer :: dtaux2d_bl  (:,:)   => null()  !
+    real (kind=kind_phys), pointer :: dtauy2d_bl  (:,:)   => null()  !
+    real (kind=kind_phys), pointer :: dtaux2d_ss  (:,:)   => null()  !
+    real (kind=kind_phys), pointer :: dtauy2d_ss  (:,:)   => null()  !
+    real (kind=kind_phys), pointer :: dtaux2d_fd  (:,:)   => null()  !
+    real (kind=kind_phys), pointer :: dtauy2d_fd  (:,:)   => null()  !
+    real (kind=kind_phys), pointer :: dusfc_ls    (:)     => null()  !
+    real (kind=kind_phys), pointer :: dvsfc_ls    (:)     => null()  !
+    real (kind=kind_phys), pointer :: dusfc_bl    (:)     => null()  !
+    real (kind=kind_phys), pointer :: dvsfc_bl    (:)     => null()  !
+    real (kind=kind_phys), pointer :: dusfc_ss    (:)     => null()  !
+    real (kind=kind_phys), pointer :: dvsfc_ss    (:)     => null()  !
+    real (kind=kind_phys), pointer :: dusfc_fd    (:)     => null()  !
+    real (kind=kind_phys), pointer :: dvsfc_fd    (:)     => null()  !
+#endif
+IN subroutine diag_create
+
+
+    !--- Drag Suite variables:
+    if (Model%gwd_opt == 33 .or. Model%gwd_opt == 22) then
+      !print*,"Allocating all Drag Suite variables:"
+      allocate (Diag%dtaux2d_ls  (IM,Model%levs))
+      allocate (Diag%dtauy2d_ls  (IM,Model%levs))
+      allocate (Diag%dtaux2d_bl  (IM,Model%levs))
+      allocate (Diag%dtauy2d_bl  (IM,Model%levs))
+      allocate (Diag%dtaux2d_ss  (IM,Model%levs))
+      allocate (Diag%dtauy2d_ss  (IM,Model%levs))
+      allocate (Diag%dtaux2d_fd  (IM,Model%levs))
+      allocate (Diag%dtauy2d_fd  (IM,Model%levs))
+      Diag%dtaux2d_ls    = clear_val
+      Diag%dtauy2d_ls    = clear_val
+      Diag%dtaux2d_bl    = clear_val
+      Diag%dtauy2d_bl    = clear_val
+      Diag%dtaux2d_ss    = clear_val
+      Diag%dtauy2d_ss    = clear_val
+      Diag%dtaux2d_fd    = clear_val
+      Diag%dtauy2d_fd    = clear_val
+      allocate (Diag%dusfc_ls    (IM))
+      allocate (Diag%dvsfc_ls    (IM))
+      allocate (Diag%dusfc_bl    (IM))
+      allocate (Diag%dvsfc_bl    (IM))
+      allocate (Diag%dusfc_ss    (IM))
+      allocate (Diag%dvsfc_ss    (IM))
+      allocate (Diag%dusfc_fd    (IM))
+      allocate (Diag%dvsfc_fd    (IM))
+      Diag%dusfc_ls      = 0
+      Diag%dvsfc_ls      = 0
+      Diag%dusfc_bl      = 0
+      Diag%dvsfc_bl      = 0
+      Diag%dusfc_ss      = 0
+      Diag%dvsfc_ss      = 0
+      Diag%dusfc_fd      = 0
+      Diag%dvsfc_fd      = 0
+    endif
+#endif!-----------------------------
+    if (Model%ldiag_ugwp)   then
+    
+      if(Model%me == Model%master) print *,'VAY in diag_phys_zero at kdt=',Model%kdt, Model%ldiag_ugwp      
+!
+      Diag%du3dt_ogw   = zero
+      Diag%dv3dt_ogw   = zero
+      Diag%dt3dt_ogw   = zero
+
+      Diag%du3dt_mtb   = zero
+      Diag%dv3dt_mtb   = zero
+      Diag%dt3dt_mtb   = zero
+
+      Diag%du3dt_tms   = zero
+      Diag%dv3dt_tms   = zero
+      Diag%dt3dt_tms   = zero
+
+      Diag%du3dt_ngw   = zero
+      Diag%dv3dt_ngw   = zero
+      Diag%dt3dt_ngw   = zero
+      Diag%uav_ugwp    = zero
+      Diag%tav_ugwp    = zero      
+      
+      Diag%du3dt_pbl   = zero
+      Diag%dv3dt_pbl   = zero
+      Diag%dt3dt_pbl   = zero
+      
+!COORDE      
+      Diag%du3dt_moist = zero
+      Diag%dv3dt_moist = zero
+      Diag%dt3dt_moist = zero
+      Diag%dudt_tot    = zero
+      Diag%dvdt_tot    = zero
+      Diag%dtdt_tot    = zero
+      Diag%du3dt_dyn   = zero
+!COORDE      
+      
+      Diag%zmtb        = zero
+      Diag%zogw        = zero
+      Diag%zlwb        = zero
+
+      Diag%tau_mtb     = zero
+      Diag%tau_ogw     = zero
+      Diag%tau_ngw     = zero
+      Diag%tau_tofd    = zero
+      
+    endif
+
+
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+  type GFS_interstitial_type
+
+    real (kind=kind_phys), pointer      :: dvsfcg(:)          => null()  !<
+    real (kind=kind_phys), pointer      :: dusfcg(:)          => null()  !<
+    real (kind=kind_phys), pointer      :: gwdcu(:,:)         => null()  !<
+    real (kind=kind_phys), pointer      :: gwdcv(:,:)         => null()  !<
+    integer,               pointer      :: kpbl(:)            => null()  !<
+
+!==================================================================================================
+! below defined GW-related arrays will be valid for both CCPP and GFS-IPD configurations of physics
+!   type GFS_interstitial_type
+! five mechnanisms of momentum deposition
+! (oss, ofd, obl, ogw) + ngw = sum( sso + ngw) 
+!==================================================================================================    
+    real (kind=kind_phys), pointer      :: dudt_gw(:,:)       => null()  !<
+    real (kind=kind_phys), pointer      :: dvdt_gw(:,:)       => null()  !<
+    real (kind=kind_phys), pointer      :: dtdt_gw(:,:)       => null()  !<
+    real (kind=kind_phys), pointer      :: kdis_gw(:,:)       => null()  !<
+    
+    real (kind=kind_phys), pointer      :: dudt_ngw(:,:)      => null()  !<
+    real (kind=kind_phys), pointer      :: dvdt_ngw(:,:)      => null()  !<
+    real (kind=kind_phys), pointer      :: dtdt_ngw(:,:)      => null()  !<
+    real (kind=kind_phys), pointer      :: kdis_ngw(:,:)      => null()  !< 
+       
+    real (kind=kind_phys), pointer      :: dudt_ogw(:,:)      => null()  !<
+    real (kind=kind_phys), pointer      :: dvdt_ogw(:,:)      => null()  !<
+    real (kind=kind_phys), pointer      :: dtdt_sso(:,:)      => null()  !<   
+    real (kind=kind_phys), pointer      :: dudt_obl(:,:)      => null()  !<
+    real (kind=kind_phys), pointer      :: dvdt_obl(:,:)      => null()  !<   
+    real (kind=kind_phys), pointer      :: dudt_ofd(:,:)      => null()  !<
+    real (kind=kind_phys), pointer      :: dvdt_ofd(:,:)      => null()  !<      
+    
+    real (kind=kind_phys), pointer      :: du_ogwcol(:)       => null()  !<       
+    real (kind=kind_phys), pointer      :: dv_ogwcol(:)       => null()  !<   
+    real (kind=kind_phys), pointer      :: du_oblcol(:)       => null()  !<       
+    real (kind=kind_phys), pointer      :: dv_oblcol(:)       => null()  !<    
+    real (kind=kind_phys), pointer      :: du_osscol(:)       => null()  !<       
+    real (kind=kind_phys), pointer      :: dv_osscol(:)       => null()  !<  
+    real (kind=kind_phys), pointer      :: du_ofdcol(:)       => null()  !<       
+    real (kind=kind_phys), pointer      :: dv_ofdcol(:)       => null()  !<   
+                  
+    real (kind=kind_phys), pointer      :: tau_oss(: )        => null()  !< instantaneous momentum flux due to OSS    
+    real (kind=kind_phys), pointer      :: tau_tofd(:)        => null()  !< instantaneous momentum flux due to TOFD
+    real (kind=kind_phys), pointer      :: tau_mtb(:)         => null()  !< instantaneous momentum flux due to mountain blocking drag
+    real (kind=kind_phys), pointer      :: tau_ogw(:)         => null()  !< instantaneous momentum flux due to OGW source function
+    real (kind=kind_phys), pointer      :: tau_ngw(:)         => null()  !< instantaneous momentum flux due to NGW source function
+    
+    real (kind=kind_phys), pointer      :: zngw(:)            => null()  !< launch levels of NGWs    
+    real (kind=kind_phys), pointer      :: zmtb(:)            => null()  !< mountain blocking height
+    real (kind=kind_phys), pointer      :: zlwb(:)            => null()  !< low level wave breaking height
+    real (kind=kind_phys), pointer      :: zogw(:)            => null()  !< height of drag due to orographic gravity wave
+    
+    real (kind=kind_phys), pointer      :: dudt_mtb(:,:)      => null()  !< instant u-wind tend due to mountain blocking drag
+    real (kind=kind_phys), pointer      :: dudt_ogw(:,:)      => null()  !< instant u-wind tend due to orographic gravity wave drag
+    real (kind=kind_phys), pointer      :: dudt_tms(:,:)      => null()  !< instant u-wind tend due to TMS
+    
+    
+!==================================================================================================  
+!
+!==================================================================================================
+   
+    
+    real (kind=kind_phys), pointer      :: varss(:)           => null()  !<
+    real (kind=kind_phys), pointer      :: ocss(:)            => null()  !<
+    real (kind=kind_phys), pointer      :: oa4ss(:,:)         => null()  !<
+    real (kind=kind_phys), pointer      :: clxss(:,:)         => null()  !<
+    
+!==================================================================================================   
+subroutine interstitial_create   
+
+ 
+! CIRES UGWP v0
+    allocate (Interstitial%gw_dudt         (IM,Model%levs))
+    allocate (Interstitial%gw_dvdt         (IM,Model%levs))
+    allocate (Interstitial%gw_dtdt         (IM,Model%levs))
+    allocate (Interstitial%gw_kdis         (IM,Model%levs))
+    allocate (Interstitial%tau_mtb         (IM))
+    allocate (Interstitial%tau_ogw         (IM))
+    allocate (Interstitial%tau_tofd        (IM))
+    allocate (Interstitial%tau_ngw         (IM))
+    allocate (Interstitial%zmtb            (IM))
+    allocate (Interstitial%zlwb            (IM))
+    allocate (Interstitial%zogw            (IM))
+    allocate (Interstitial%dudt_mtb        (IM,Model%levs))
+    allocate (Interstitial%dudt_ogw        (IM,Model%levs))
+    allocate (Interstitial%dudt_tms        (IM,Model%levs))
+!-- GSL drag suite
+    if (Model%gwd_opt==3 .or. Model%gwd_opt==33 .or.            &
+        Model%gwd_opt==2 .or. Model%gwd_opt==22 ) then
+       allocate (Interstitial%varss           (IM))
+       allocate (Interstitial%ocss            (IM))
+       allocate (Interstitial%oa4ss           (IM,4))
+       allocate (Interstitial%clxss           (IM,4))
+    end if    
+    
+    allocate (Sfcprop%oro     (IM))
+    allocate (Sfcprop%oro_uf  (IM))   
