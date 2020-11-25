@@ -1276,6 +1276,13 @@ module GFS_typedefs
     real (kind=kind_phys), pointer :: ddx_aer    (:) => null()   !< interpolation     weight for iaerclm
     integer,               pointer :: iindx1_aer (:) => null()   !< interpolation  low index for iaerclm
     integer,               pointer :: iindx2_aer (:) => null()   !< interpolation high index for iaerclm
+
+!--- grid-related interpolation data for cires_ugwp_v1
+    real (kind=kind_phys), pointer :: ddy_j1tau  (:) => null()   !< interpolation     weight for  tau_ugwp
+    real (kind=kind_phys), pointer :: ddy_j2tau  (:) => null()   !< interpolation     weight for  tau_ugwp
+    integer,               pointer :: jindx1_tau (:) => null()   !< interpolation  low index for tau_ugwp
+    integer,               pointer :: jindx2_tau (:) => null()   !< interpolation high index for tau_ugwp 
+       
     contains
       procedure :: create   => grid_create   !<   allocate array data
   end type GFS_grid_type
@@ -1652,31 +1659,6 @@ module GFS_typedefs
     real (kind=kind_phys), pointer :: du3dt_moist(:,:) => null()  !< daily aver GFS_phys tend for WE-U MOIST
     real (kind=kind_phys), pointer :: dv3dt_moist(:,:) => null()  !< daily aver GFS_phys tend for SN-V MOIST
     real (kind=kind_phys), pointer :: dt3dt_moist(:,:) => null()  !< daily aver GFS_phys tend for Temp MOIST
-!
-!--- Instantaneous UGWP-diagnostics  16-variables
-!       Diag%gwp_ax, Diag%gwp_axo, Diag%gwp_axc, Diag%gwp_axf,       &
-!       Diag%gwp_ay, Diag%gwp_ayo, Diag%gwp_ayc, Diag%gwp_ayf,       &
-!       Diag%gwp_dtdt,   Diag%gwp_kdis, Diag%gwp_okw, Diag%gwp_fgf,  &
-!       Diag%gwp_dcheat, Diag%gwp_precip, Diag%gwp_klevs,            &
-!       Diag%gwp_scheat
-
-    real (kind=kind_phys), pointer :: gwp_scheat(:,:) => null()  ! instant shal-conv heat tendency
-    real (kind=kind_phys), pointer :: gwp_dcheat(:,:) => null()  ! instant deep-conv heat tendency
-    real (kind=kind_phys), pointer :: gwp_precip(:) => null()    ! total precip rates
-    integer , pointer              :: gwp_klevs(:,:)=> null()    ! instant levels for GW-launches
-    real (kind=kind_phys), pointer :: gwp_fgf(:)    => null()    ! fgf triggers
-    real (kind=kind_phys), pointer :: gwp_okw(:)    => null()    ! okw triggers
-
-    real (kind=kind_phys), pointer :: gwp_ax(:,:)   => null()    ! instant total UGWP tend m/s/s EW
-    real (kind=kind_phys), pointer :: gwp_ay(:,:)   => null()    ! instant total UGWP tend m/s/s NS
-    real (kind=kind_phys), pointer :: gwp_dtdt(:,:) => null()    ! instant total heat tend   K/s
-    real (kind=kind_phys), pointer :: gwp_kdis(:,:) => null()    ! instant total eddy mixing m2/s
-    real (kind=kind_phys), pointer :: gwp_axc(:,:)   => null()   ! instant con-UGWP tend m/s/s EW
-    real (kind=kind_phys), pointer :: gwp_ayc(:,:)   => null()   ! instant con-UGWP tend m/s/s NS
-    real (kind=kind_phys), pointer :: gwp_axo(:,:)   => null()   ! instant oro-UGWP tend m/s/s EW
-    real (kind=kind_phys), pointer :: gwp_ayo(:,:)   => null()   ! instant oro-UGWP tend m/s/s NS
-    real (kind=kind_phys), pointer :: gwp_axf(:,:)   => null()   ! instant jet-UGWP tend m/s/s EW
-    real (kind=kind_phys), pointer :: gwp_ayf(:,:)   => null()   ! instant jet-UGWP tend m/s/s NS
 
     real (kind=kind_phys), pointer :: uav_ugwp(:,:)   => null()   ! aver  wind UAV from physics
     real (kind=kind_phys), pointer :: tav_ugwp(:,:)   => null()   ! aver  temp UAV from physics
@@ -2057,20 +2039,55 @@ module GFS_typedefs
     real (kind=kind_phys), pointer      :: zorl_land(:)       => null()  !<
     real (kind=kind_phys), pointer      :: zorl_ocean(:)      => null()  !<
     real (kind=kind_phys), pointer      :: zt1d(:)            => null()  !<
-    real (kind=kind_phys), pointer      :: gw_dudt(:,:)       => null()  !<
-    real (kind=kind_phys), pointer      :: gw_dvdt(:,:)       => null()  !<
-    real (kind=kind_phys), pointer      :: gw_dtdt(:,:)       => null()  !<
-    real (kind=kind_phys), pointer      :: gw_kdis(:,:)       => null()  !<
+!==================================================================================================    
+! five mechnanisms of momentum deposition due to various types of GWs
+! (oss, ofd, obl, ogw) + ngw = sum( sso + ngw) 
+!==================================================================================================     
+    real (kind=kind_phys), pointer      :: dudt_gw(:,:)       => null()  !<
+    real (kind=kind_phys), pointer      :: dvdt_gw(:,:)       => null()  !<
+    real (kind=kind_phys), pointer      :: dtdt_gw(:,:)       => null()  !<
+    real (kind=kind_phys), pointer      :: kdis_gw(:,:)       => null()  !<
+    
+    real (kind=kind_phys), pointer      :: dudt_ngw(:,:)      => null()  !<
+    real (kind=kind_phys), pointer      :: dvdt_ngw(:,:)      => null()  !<
+    real (kind=kind_phys), pointer      :: dtdt_ngw(:,:)      => null()  !<
+    real (kind=kind_phys), pointer      :: kdis_ngw(:,:)      => null()  !<
+    
+    real (kind=kind_phys), pointer      :: dudt_ogw(:,:)      => null()  !<
+    real (kind=kind_phys), pointer      :: dvdt_ogw(:,:)      => null()  !<
+    real (kind=kind_phys), pointer      :: dtdt_sso(:,:)      => null()  !<   
+    real (kind=kind_phys), pointer      :: dudt_obl(:,:)      => null()  !<
+    real (kind=kind_phys), pointer      :: dvdt_obl(:,:)      => null()  !<  
+    real (kind=kind_phys), pointer      :: dudt_oss(:,:)      => null()  !<
+    real (kind=kind_phys), pointer      :: dvdt_oss(:,:)      => null()  !<        
+    real (kind=kind_phys), pointer      :: dudt_ofd(:,:)      => null()  !<
+    real (kind=kind_phys), pointer      :: dvdt_ofd(:,:)      => null()  !<
+
+    real (kind=kind_phys), pointer      :: du_ogwcol(:)       => null()  !<       
+    real (kind=kind_phys), pointer      :: dv_ogwcol(:)       => null()  !<   
+    real (kind=kind_phys), pointer      :: du_oblcol(:)       => null()  !<       
+    real (kind=kind_phys), pointer      :: dv_oblcol(:)       => null()  !<    
+    real (kind=kind_phys), pointer      :: du_osscol(:)       => null()  !<       
+    real (kind=kind_phys), pointer      :: dv_osscol(:)       => null()  !<  
+    real (kind=kind_phys), pointer      :: du_ofdcol(:)       => null()  !<       
+    real (kind=kind_phys), pointer      :: dv_ofdcol(:)       => null()  !<              
+
+    real (kind=kind_phys), pointer      :: tau_oss(: )        => null()  !< instantaneous momentum flux due to OSS        
     real (kind=kind_phys), pointer      :: tau_tofd(:)        => null()  !< instantaneous momentum flux due to TOFD
-    real (kind=kind_phys), pointer      :: tau_mtb(:)         => null()  !< instantaneous momentum flux due to mountain blocking drag
-    real (kind=kind_phys), pointer      :: tau_ogw(:)         => null()  !< instantaneous momentum flux due to orographic gravity wave drag
-    real (kind=kind_phys), pointer      :: tau_ngw(:)         => null()  !< instantaneous momentum flux due to nonstationary gravity waves
-    real (kind=kind_phys), pointer      :: zmtb(:)            => null()  !< mountain blocking height
+    real (kind=kind_phys), pointer      :: tau_mtb(:)         => null()  !< instantaneous mom-flux due to mountain blocking drag
+    real (kind=kind_phys), pointer      :: tau_ogw(:)         => null()  !< instantaneous momentum flux of OGWs
+    real (kind=kind_phys), pointer      :: tau_ngw(:)         => null()  !< instantaneous momentum flux of NGWs
+
+    real (kind=kind_phys), pointer      :: zngw(:)            => null()  !< launch levels of NGWs        
+    real (kind=kind_phys), pointer      :: zobl(:)            => null()  !< mountain blocking height
     real (kind=kind_phys), pointer      :: zlwb(:)            => null()  !< low level wave breaking height
     real (kind=kind_phys), pointer      :: zogw(:)            => null()  !< height of drag due to orographic gravity wave
-    real (kind=kind_phys), pointer      :: dudt_mtb(:,:)      => null()  !< daily aver u-wind tend due to mountain blocking drag
-    real (kind=kind_phys), pointer      :: dudt_ogw(:,:)      => null()  !< daily aver u-wind tend due to orographic gravity wave drag
-    real (kind=kind_phys), pointer      :: dudt_tms(:,:)      => null()  !< daily aver u-wind tend due to TMS
+    
+    real (kind=kind_phys), pointer      :: zmtb(:)            => null()  !< aver  mountain blocking height    
+    real (kind=kind_phys), pointer      :: dudt_mtb(:,:)      => null()  !< aver u-wind tend due to mountain blocking drag
+
+    
+    real (kind=kind_phys), pointer      :: dudt_tms(:,:)      => null()  !< aver u-wind tend due to TMS
 
 #ifdef CCPP
     ! RRTMGP
@@ -5465,6 +5482,15 @@ module GFS_typedefs
       allocate (Grid%iindx1_aer(IM))
       allocate (Grid%iindx2_aer(IM))
     endif
+    
+!---  Model%do_ugwp-v1 
+   if ( Model%do_ugwp ) then
+      allocate (Grid%ddy_j1tau    (IM))
+      allocate (Grid%ddy_j2tau    (IM))
+      allocate (Grid%jindx1_tau (IM))
+      allocate (Grid%jindx2_tau (IM))
+   endif
+       
  end subroutine grid_create
 
 
@@ -5910,31 +5936,6 @@ module GFS_typedefs
        allocate (Diag%tau_tofd  (IM) )
 !   endif
 
-!
-!ugwp - instant
-!
-    if (Model%do_ugwp) then
-      allocate (Diag%gwp_ax  (IM,Model%levs) )
-      allocate (Diag%gwp_ay  (IM,Model%levs) )
-      allocate (Diag%gwp_dtdt(IM,Model%levs) )
-      allocate (Diag%gwp_kdis(IM,Model%levs) )
-
-      allocate (Diag%gwp_axo  (IM,Model%levs) )
-      allocate (Diag%gwp_ayo  (IM,Model%levs) )
-      allocate (Diag%gwp_axc  (IM,Model%levs) )
-      allocate (Diag%gwp_ayc  (IM,Model%levs) )
-      allocate (Diag%gwp_axf  (IM,Model%levs) )
-      allocate (Diag%gwp_ayf  (IM,Model%levs) )
-!GW-sources
-      allocate (Diag%gwp_dcheat(IM,Model%levs) )
-      allocate (Diag%gwp_scheat(IM,Model%levs) )
-      allocate (Diag%gwp_fgf  (IM            ) )
-      allocate (Diag%gwp_okw  (IM            ) )
-
-      allocate (Diag%gwp_precip(IM) )
-      allocate (Diag%gwp_klevs (IM, 3) )
-
-    endif
 
     !--- 3D diagnostics for Thompson MP / GFDL MP
     allocate (Diag%refl_10cm(IM,Model%levs))
@@ -6263,26 +6264,7 @@ module GFS_typedefs
       Diag%tau_ngw     = zero
       Diag%tau_tofd    = zero
     endif
-!
-    if (Model%do_ugwp)   then
-      Diag%gwp_ax     = zero
-      Diag%gwp_ay     = zero
-      Diag%gwp_dtdt   = zero
-      Diag%gwp_kdis   = zero
-      Diag%gwp_axo    = zero
-      Diag%gwp_ayo    = zero
-      Diag%gwp_axc    = zero
-      Diag%gwp_ayc    = zero
-      Diag%gwp_axf    = zero
-      Diag%gwp_ayf    = zero
-      Diag%gwp_dcheat = zero
-      Diag%gwp_scheat = zero
-      Diag%gwp_precip = zero
-      Diag%gwp_klevs  = -99
-      Diag%gwp_fgf    = zero
-      Diag%gwp_okw    = zero
-    endif
-!-----------------------------
+
 
 ! max hourly diagnostics
     Diag%refl_10cm   = zero
@@ -6707,21 +6689,52 @@ module GFS_typedefs
        allocate (Interstitial%toa_src_lw           (IM,Model%rrtmgp_nGptsLW))
        allocate (Interstitial%active_gases_array   (Model%nGases))
     end if
-! CIRES UGWP v0
-    allocate (Interstitial%gw_dudt         (IM,Model%levs))
-    allocate (Interstitial%gw_dvdt         (IM,Model%levs))
-    allocate (Interstitial%gw_dtdt         (IM,Model%levs))
-    allocate (Interstitial%gw_kdis         (IM,Model%levs))
+    
+! CIRES UGWP v1 in CCPP
+    allocate (Interstitial%dudt_gw         (IM,Model%levs))
+    allocate (Interstitial%dvdt_gw         (IM,Model%levs))
+    allocate (Interstitial%dtdt_gw         (IM,Model%levs))
+    allocate (Interstitial%kdis_gw         (IM,Model%levs))
+    
+    allocate (Interstitial%dudt_ngw         (IM,Model%levs))
+    allocate (Interstitial%dvdt_ngw         (IM,Model%levs))
+    allocate (Interstitial%dtdt_ngw         (IM,Model%levs))
+    allocate (Interstitial%kdis_ngw         (IM,Model%levs))    
+    
     allocate (Interstitial%tau_mtb         (IM))
     allocate (Interstitial%tau_ogw         (IM))
     allocate (Interstitial%tau_tofd        (IM))
     allocate (Interstitial%tau_ngw         (IM))
-    allocate (Interstitial%zmtb            (IM))
+    allocate (Interstitial%tau_oss         (IM)) 
+    
+       
+    allocate (Interstitial%zobl            (IM))
     allocate (Interstitial%zlwb            (IM))
     allocate (Interstitial%zogw            (IM))
-    allocate (Interstitial%dudt_mtb        (IM,Model%levs))
+    allocate (Interstitial%zngw            (IM))  
+    
+      
+    allocate (Interstitial%dudt_obl        (IM,Model%levs))
     allocate (Interstitial%dudt_ogw        (IM,Model%levs))
-    allocate (Interstitial%dudt_tms        (IM,Model%levs))
+    allocate (Interstitial%dudt_ofd        (IM,Model%levs))
+    allocate (Interstitial%dudt_oss        (IM,Model%levs)) 
+    
+    allocate (Interstitial%dvdt_obl        (IM,Model%levs))
+    allocate (Interstitial%dvdt_ogw        (IM,Model%levs))
+    allocate (Interstitial%dvdt_ofd        (IM,Model%levs))
+    allocate (Interstitial%dvdt_oss        (IM,Model%levs))     
+    
+    allocate (Interstitial%dtdt_sso        (IM,Model%levs))  
+    
+    allocate (Interstitial%du_ogwcol            (IM))   
+    allocate (Interstitial%dv_ogwcol            (IM)) 
+    allocate (Interstitial%du_oblcol            (IM))   
+    allocate (Interstitial%dv_oblcol            (IM))     
+    allocate (Interstitial%du_osscol            (IM))   
+    allocate (Interstitial%dv_osscol            (IM))       
+    allocate (Interstitial%du_ofdcol            (IM))   
+    allocate (Interstitial%dv_ofdcol            (IM))              
+                  
 !-- GSL drag suite
     if (Model%gwd_opt==3 .or. Model%gwd_opt==33 .or.            &
         Model%gwd_opt==2 .or. Model%gwd_opt==22 ) then
@@ -7317,11 +7330,12 @@ module GFS_typedefs
     Interstitial%zorl_land       = huge
     Interstitial%zorl_ocean      = huge
     Interstitial%zt1d            = clear_val
-! CIRES UGWP v0
-    Interstitial%gw_dudt         = clear_val
-    Interstitial%gw_dvdt         = clear_val
-    Interstitial%gw_dtdt         = clear_val
-    Interstitial%gw_kdis         = clear_val
+    
+! CIRES UGWP v0/v1
+    Interstitial%dudt_gw         = clear_val
+    Interstitial%dvdt_gw         = clear_val
+    Interstitial%dtdt_gw         = clear_val
+    Interstitial%kdis_gw         = clear_val
     Interstitial%tau_mtb         = clear_val
     Interstitial%tau_ogw         = clear_val
     Interstitial%tau_tofd        = clear_val
@@ -7329,9 +7343,11 @@ module GFS_typedefs
     Interstitial%zmtb            = clear_val
     Interstitial%zlwb            = clear_val
     Interstitial%zogw            = clear_val
+    Interstitial%zngw            = clear_val    
     Interstitial%dudt_mtb        = clear_val
     Interstitial%dudt_ogw        = clear_val
     Interstitial%dudt_tms        = clear_val
+    
 !-- GSL drag suite
     if (Model%gwd_opt==3 .or. Model%gwd_opt==33 .or.     &
         Model%gwd_opt==2 .or. Model%gwd_opt==22) then
@@ -7706,20 +7722,19 @@ module GFS_typedefs
     write (0,*) 'sum(Interstitial%zorl_ocean      ) = ', sum(Interstitial%zorl_ocean      )
     write (0,*) 'sum(Interstitial%zt1d            ) = ', sum(Interstitial%zt1d            )
 ! CIRES UGWP v0
-    write (0,*) 'sum(Interstitial%gw_dudt         ) = ', sum(Interstitial%gw_dudt         )
-    write (0,*) 'sum(Interstitial%gw_dvdt         ) = ', sum(Interstitial%gw_dvdt         )
-    write (0,*) 'sum(Interstitial%gw_dtdt         ) = ', sum(Interstitial%gw_dtdt         )
-    write (0,*) 'sum(Interstitial%gw_kdis         ) = ', sum(Interstitial%gw_kdis         )
-    write (0,*) 'sum(Interstitial%tau_mtb         ) = ', sum(Interstitial%tau_mtb         )
+!    write (0,*) 'sum(Interstitial%dudt_gw         ) = ', sum(Interstitial%dudt_gw         )
+!    write (0,*) 'sum(Interstitial%dvdt_gw         ) = ', sum(Interstitial%dvdt_gw         )
+!    write (0,*) 'sum(Interstitial%dtdt_gw         ) = ', sum(Interstitial%dtdt_gw         )
+!    write (0,*) 'sum(Interstitial%kdis_gw         ) = ', sum(Interstitial%kdis_gw         )
+!    write (0,*) 'sum(Interstitial%tau_mtb         ) = ', sum(Interstitial%tau_mtb         )
     write (0,*) 'sum(Interstitial%tau_ogw         ) = ', sum(Interstitial%tau_ogw         )
-    write (0,*) 'sum(Interstitial%tau_tofd        ) = ', sum(Interstitial%tau_tofd        )
+!    write (0,*) 'sum(Interstitial%tau_tofd        ) = ', sum(Interstitial%tau_tofd        )
     write (0,*) 'sum(Interstitial%tau_ngw         ) = ', sum(Interstitial%tau_ngw         )
-    write (0,*) 'sum(Interstitial%zmtb            ) = ', sum(Interstitial%zmtb            )
-    write (0,*) 'sum(Interstitial%zlwb            ) = ', sum(Interstitial%zlwb            )
+    write (0,*) 'sum(Interstitial%zobl            ) = ', sum(Interstitial%zobl            )
     write (0,*) 'sum(Interstitial%zogw            ) = ', sum(Interstitial%zogw            )
-    write (0,*) 'sum(Interstitial%dudt_mtb        ) = ', sum(Interstitial%dudt_mtb        )
-    write (0,*) 'sum(Interstitial%dudt_ogw        ) = ', sum(Interstitial%dudt_ogw        )
-    write (0,*) 'sum(Interstitial%dudt_tms        ) = ', sum(Interstitial%dudt_tms        )
+!    write (0,*) 'sum(Interstitial%dudt_mtb        ) = ', sum(Interstitial%dudt_mtb        )
+!    write (0,*) 'sum(Interstitial%dudt_ogw        ) = ', sum(Interstitial%dudt_ogw        )
+!    write (0,*) 'sum(Interstitial%dudt_tms        ) = ', sum(Interstitial%dudt_tms        )
 !-- GSL drag suite
     if (Model%gwd_opt==3 .or. Model%gwd_opt==33 .or.       &
         Model%gwd_opt==2 .or. Model%gwd_opt==22) then
