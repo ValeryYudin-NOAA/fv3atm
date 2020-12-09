@@ -1,0 +1,26 @@
+
+
+ls /scratch2/NCEPDEV/stmp3/Svetlana.Karol/ROTDIRS/testccpp/gdas.20200714/18/atmos/RESTART
+
+/scratch1/NCEPDEV/stmp2/Valery.Yudin/FV3_RT
+
+suite_FV3_GSD_v0_drag_suite.xml
+suite_FV3_GSD_v0_unified_ugwp_suite.xml
+
+suite_FV3_GSD_v1_drag_suite.xml             - identical 
+suite_FV3_GSD_v1_unified_ugwp_suite.xml     - 3 new entries
+
+      <scheme>GFS_phys_time_vary_v1</scheme>
+      <scheme>unified_ugwpv1</scheme>
+      <scheme>unified_ugwpv1_post</scheme>
+
+cmp /scratch1/BMC/wrfruc/mtoy/git_local/ufs-weather-model/REGRESSION_TEST_INTEL/fv3_gsd_drag_suite_repro/dynf024.tile6.nc dynf024.tile6.nc
+
+edits in GFS_layer <=> copy "OLD" *F90 + *meta
+
+Cases:
+
+edits in GFS_layer
+
+a) reproduction of ugwp_v0
+   
