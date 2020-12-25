@@ -875,6 +875,7 @@ module GFS_typedefs
     logical              :: do_gsl_drag_tofd     !< flag for GSL drag (turbulent orog form drag only)
     logical              :: do_ugwp_v1           !< flag for version 1 ugwp GWD
     logical              :: do_ugwp_v1_orog_only !< flag for version 1 ugwp GWD (orographic drag only)
+    logical              :: do_ugwp_v1_w_gsldrag !< flag for version 1 ugwp with OGWD of GSL    
 #endif
     logical              :: mstrat          !< flag for moorthi approach for stratus
     logical              :: moist_adj       !< flag for moist convective adjustment
@@ -3263,6 +3264,7 @@ module GFS_typedefs
     logical              :: do_gsl_drag_tofd     = .false.      !< flag for GSL drag (turbulent orog form drag only)
     logical              :: do_ugwp_v1           = .false.      !< flag for version 1 ugwp GWD
     logical              :: do_ugwp_v1_orog_only = .false.      !< flag for version 1 ugwp GWD (orographic drag only)
+    logical              :: do_ugwp_v1_w_gsldrag = .false.      !< flag for version 1 ugwp GWD (orographic drag only)    
 !--- vay-2018
     logical              :: ldiag_ugwp     = .false.                  !< flag for UGWP diag fields
     logical              :: do_ugwp        = .false.                  !< flag do UGWP+RF
@@ -3569,7 +3571,7 @@ module GFS_typedefs
                                ! *DH
                                gwd_opt, do_ugwp_v0, do_ugwp_v0_orog_only,                   &
                                do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,         &
-                               do_ugwp_v1, do_ugwp_v1_orog_only,                            &
+                               do_ugwp_v1, do_ugwp_v1_orog_only,  do_ugwp_v1_w_gsldrag,     &
                                var_ric, coef_ric_l, coef_ric_s, hurr_pbl,                   &
                                do_myjsfc, do_myjpbl,                                        &
                                hwrf_samfdeep, hwrf_samfshal,                                &
@@ -4138,9 +4140,10 @@ module GFS_typedefs
     Model%prauras           = prauras
     Model%wminras           = wminras
     Model%rbcr              = rbcr
-    Model%do_gwd            = maxval(Model%cdmbgwd) > 0.0
-      
-    Model%do_cnvgwd         = Model%cnvgwd .and. maxval(Model%cdmbgwd(3:4)) == 0.0
+    Model%do_gwd            = maxval(Model%cdmbgwd) > 0.0  ! Moorthi's flag to restore OGWs of GFS-v15
+!      
+! OLD GFS-v12-15 conv scheme   Model%do_cnvgwd         = Model%cnvgwd .and. maxval(Model%cdmbgwd(3:4)) == 0.0
+    Model%do_cnvgwd         = .false.               ! this avoids all "mysteries" to use Convective GWs in UFS
 #ifdef CCPP
     Model%do_mynnedmf       = do_mynnedmf
     Model%do_mynnsfclay     = do_mynnsfclay
@@ -4160,20 +4163,39 @@ module GFS_typedefs
     Model%var_ric           = var_ric
     Model%coef_ric_l        = coef_ric_l
     Model%coef_ric_s        = coef_ric_s
+    
     ! *DH
     Model%gwd_opt           = gwd_opt
     if (Model%gwd_opt==3 .or. Model%gwd_opt==33 .or. &
         Model%gwd_opt==2 .or. Model%gwd_opt==22) then
-      ! Add 10 more orographic static fields for GSL drag scheme
+    ! Add 10 more orographic static fields for GSL drag scheme
       Model%nmtvr = 24
     end if
+    
     Model%do_ugwp_v0           = do_ugwp_v0
     Model%do_ugwp_v0_orog_only = do_ugwp_v0_orog_only
-    Model%do_gsl_drag_ls_bl    = do_gsl_drag_ls_bl
+
+     Model%do_gsl_drag_ls_bl    = do_gsl_drag_ls_bl
     Model%do_gsl_drag_ss       = do_gsl_drag_ss
     Model%do_gsl_drag_tofd     = do_gsl_drag_tofd
+    
     Model%do_ugwp_v1           = do_ugwp_v1
     Model%do_ugwp_v1_orog_only = do_ugwp_v1_orog_only
+    Model%do_ugwp_v1_w_gsldrag = do_ugwp_v1_w_gsldrag 
+!
+! consistency in application of the combined ugwp-v1 and gsldrag 
+!    
+    if ( Model%do_ugwp_v1_w_gsldrag) then
+       if(Model%gwd_opt == 1 )then
+          Model%gwd_opt =2
+	  Model%nmtvr = 24 
+       endif 
+       Model%do_gsl_drag_ls_bl    = .true.
+       Model%do_gsl_drag_tofd     = .true.
+       Model%do_gsl_drag_ss       = .true.
+       Model%do_ugwp_v1_orog_only = .false.             
+    endif 
+    
     Model%do_myjsfc            = do_myjsfc
     Model%do_myjpbl            = do_myjpbl
 #endif
@@ -4532,6 +4554,9 @@ module GFS_typedefs
 
 !--- output information about the run
     if (Model%me == Model%master) then
+    
+        print *, ' VAY size(ak-bk vert grid) ', size(ak), size(bk)
+	
       if (Model%lsm == 1) then
         print *,' NOAH Land Surface Model used'
       elseif (Model%lsm == 0) then
@@ -5282,6 +5307,8 @@ module GFS_typedefs
       print *, ' do_gsl_drag_tofd     : ', Model%do_gsl_drag_tofd
       print *, ' do_ugwp_v1           : ', Model%do_ugwp_v1
       print *, ' do_ugwp_v1_orog_only : ', Model%do_ugwp_v1_orog_only
+      print *, ' do_ugwp_v1_w_gsldrag : ', Model%do_ugwp_v1_w_gsldrag  
+          
       print *, ' hurr_pbl          : ', Model%hurr_pbl
       print *, ' var_ric           : ', Model%var_ric
       print *, ' coef_ric_l        : ', Model%coef_ric_l
@@ -6725,6 +6752,11 @@ module GFS_typedefs
     allocate (Interstitial%dvdt_ngw         (IM,Model%levs))
     allocate (Interstitial%dtdt_ngw         (IM,Model%levs))
     allocate (Interstitial%kdis_ngw         (IM,Model%levs)) 
+    
+    allocate (Interstitial%dudt_gw         (IM,Model%levs))
+    allocate (Interstitial%dvdt_gw         (IM,Model%levs))
+    allocate (Interstitial%dtdt_gw         (IM,Model%levs))
+    allocate (Interstitial%kdis_gw         (IM,Model%levs))     
        
     allocate (Interstitial%tau_mtb         (IM))
     allocate (Interstitial%tau_ogw         (IM))
@@ -7370,24 +7402,49 @@ module GFS_typedefs
     Interstitial%gw_dvdt         = clear_val
     Interstitial%gw_dtdt         = clear_val
     Interstitial%gw_kdis         = clear_val
-    
+    Interstitial%zmtb            = clear_val  
+    Interstitial%dudt_mtb        = clear_val
+    Interstitial%dudt_ogw        = clear_val
+    Interstitial%dudt_tms        = clear_val  
+        
 ! CIRES UGWP v1
     Interstitial%dudt_gw         = clear_val
     Interstitial%dvdt_gw         = clear_val
     Interstitial%dtdt_gw         = clear_val
-    Interstitial%kdis_gw         = clear_val    
-    Interstitial%zogw            = clear_val    
+    Interstitial%kdis_gw         = clear_val
+    
+    Interstitial%dudt_ngw         = clear_val
+    Interstitial%dvdt_ngw         = clear_val
+    Interstitial%dtdt_ngw         = clear_val
+    Interstitial%kdis_ngw         = clear_val   
+    Interstitial%dvdt_ogw        = clear_val    
+    Interstitial%dudt_obl         = clear_val 
+    Interstitial%dvdt_obl         = clear_val 
+    Interstitial%dudt_oss         = clear_val 
+    Interstitial%dvdt_oss         = clear_val     
+    Interstitial%dudt_ofd         = clear_val 
+    Interstitial%dvdt_ofd         = clear_val                     
 !    
     Interstitial%tau_mtb         = clear_val
     Interstitial%tau_ogw         = clear_val
     Interstitial%tau_tofd        = clear_val
     Interstitial%tau_ngw         = clear_val
-    Interstitial%zmtb            = clear_val
+    
+    Interstitial%tau_oss         = clear_val
+    Interstitial%du_ogwcol       = clear_val
+    Interstitial%dv_ogwcol       = clear_val
+    Interstitial%du_oblcol       = clear_val
+    Interstitial%dv_oblcol       = clear_val 
+    Interstitial%du_osscol       = clear_val
+    Interstitial%dv_osscol       = clear_val  
+    Interstitial%du_ofdcol       = clear_val
+    Interstitial%dv_ofdcol       = clear_val                
+    
+    Interstitial%zobl            = clear_val    
     Interstitial%zlwb            = clear_val
     Interstitial%zogw            = clear_val
-    Interstitial%dudt_mtb        = clear_val
-    Interstitial%dudt_ogw        = clear_val
-    Interstitial%dudt_tms        = clear_val
+    Interstitial%zngw            = clear_val 
+    
     
     
 !-- GSL drag suite
